@@ -11,6 +11,16 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
+	public long count() {
+		return transactionRepository.count();
+	}
+
+	@Override
+	public void deleteAll() {
+		transactionRepository.deleteAll();
+	}
+
+	@Override
 	public Transaction save(Transaction transaction) {
 		return transactionRepository.save(transaction);
 	}
