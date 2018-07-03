@@ -1,0 +1,28 @@
+---
+version: '3'
+
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+    - 5672:5672
+    - 15672:15672
+  event-store-db:
+    image: tutum/mysql
+    container_name: event-store-db
+    ports:
+    - 3306:3306
+    environment:
+      - MYSQL_USER=consumer
+      - MYSQL_PASS=consumer
+      - ON_CREATE_DB=`event-store`
+  transaction-db:
+    image: tutum/mysql
+    container_name: transaction-db
+    ports:
+    - 3307:3306
+    environment:
+      - MYSQL_USER=consumer
+      - MYSQL_PASS=consumer
+      - ON_CREATE_DB=`transaction`

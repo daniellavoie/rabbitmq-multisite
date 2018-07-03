@@ -1,0 +1,52 @@
+---
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
+resources:
+- name: src-pr
+  type: pull-request
+  source:
+    repo: daniellavoie/rabbitmq-multisite
+    access_token: {{github-access-token}}
+    uri: {{github-uri}}
+
+jobs:
+- name: deploy-apps
+  serial_groups: [rabbitmq-multisite]
+  plan:
+  - get: src-pr
+    trigger: true
+  - put: src-pr
+    params:
+      path: src-pr
+      status: pending
+  - task: push-pull-request
+    file: src-pr/ci/tasks/deploy-apps/deploy-apps.yml
+    input_mapping:
+      src: src-pr
+    params:
+      REGION_1_CF_API: {{region-1-cf-api}}
+      REGION_1_CF_ORG: {{region-1-cf-org}}
+      REGION_1_CF_SPACE: {{region-1-cf-space}}
+      REGION_1_CF_USERNAME: {{region-1-cf-username}}
+      REGION_1_CF_PASSWORD: {{region-1-cf-password}}
+      REGION_2_CF_API: {{region-2-cf-api}}
+      REGION_2_CF_ORG: {{region-2-cf-org}}
+      REGION_2_CF_SPACE: {{region-2-cf-space}}
+      REGION_2_CF_USERNAME: {{region-2-username}}
+      REGION_2_CF_PASSWORD: {{region-2-password}}
+      REGION_3_CF_API: {{region-3-cf-api}}
+      REGION_3_CF_ORG: {{region-3-cf-org}}
+      REGION_3_CF_SPACE: {{region-3-cf-space}}
+      REGION_3_CF_USERNAME: {{region-3-username}}
+      REGION_3_CF_PASSWORD: {{region-3-password}}
+      TRANSACTION_DATASOURCE_JDBC: {{transaction-datasource-jdbc}}
+
+      on_failure:
+        put: src-pr
+        params:
+          path: src-pr
+          status: failure
