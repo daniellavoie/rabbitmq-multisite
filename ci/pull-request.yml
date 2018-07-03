@@ -11,7 +11,7 @@ resources:
   source:
     repo: daniellavoie/rabbitmq-multisite
     access_token: {{github-access-token}}
-    uri: {{github-uri}}
+    uri: https://github.com/daniellavoie/rabbitmq-multisite.git
 
 jobs:
 - name: deploy-apps
