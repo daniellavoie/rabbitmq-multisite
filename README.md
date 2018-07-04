@@ -1,10 +1,20 @@
 # RabbitMQ - Active / Active Replication
 
+This project provides a [Concourse](https://concourse-ci.org) pipeline to deploy a sample architecture showcasing
+transaction recovery in a disaster recovery involving losing a site.
+
+## Pipeline
+
+![Pipeline](doc/img/pipeline.png "Pipeline")
+
+* <strong>deploys-apps:</strong> Deploys all the apps in the involved architecture.
+* <strong>run-ha-tests:</strong> Generates events, then simulates a DR by stopping a consumer app from a site. Triggers the recovery procedure then validates that the transaction count is expected.
+
 ## Architecture Overview
 
-![alt text](doc/img/rabbitmq-active-activerreplication-1.png "RabbitMQ Active Active Replication")
+![RabbitMQ Active Active Replication](doc/img/rabbitmq-active-activerreplication-1.png "RabbitMQ Active Active Replication")
 
-![alt text](doc/img/rabbitmq-active-activerreplication-2.png "Disaster")
+![Disaster](doc/img/rabbitmq-active-activerreplication-2.png "Disaster")
 
 ## Test scenario
 
