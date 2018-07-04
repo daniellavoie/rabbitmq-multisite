@@ -20,6 +20,8 @@ transaction recovery in a disaster scenario involving losing a site.
 
 * Deploy the producer and consumer apps in `region 1` and `region 2` spaces.
 * Purge the transaction database with service from consumer app from `space 1`.
+* Purge the event-store databases from each spaces.
+* Setup the RabbitMQ exchange replication with federation.
 * Generate 1000 events for each producer app.
 * Validate that the transaction database has 2000 events registered.
 * Stop the consumer app from `region 1`.
