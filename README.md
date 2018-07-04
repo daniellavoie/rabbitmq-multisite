@@ -1,7 +1,7 @@
 # RabbitMQ - Active / Active Replication
 
 This project provides a [Concourse](https://concourse-ci.org) pipeline to deploy a sample architecture showcasing
-transaction recovery in a disaster recovery involving losing a site.
+transaction recovery in a disaster scenario involving losing a site.
 
 ## Pipeline
 
