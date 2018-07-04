@@ -1,0 +1,60 @@
+---
+resources:
+- name: src
+  type: git
+  source:
+    repo: daniellavoie/rabbitmq-multisite
+    uri: https://github.com/daniellavoie/rabbitmq-multisite.git
+
+jobs:
+- name: deploy-apps
+  serial_groups: [rabbitmq-multisite]
+  plan:
+  - get: src
+    trigger: true
+  - task: push-pull-request
+    file: src/ci/tasks/deploy-apps/deploy-apps.yml
+    params:
+      REGION_1_CF_API: {{region-1-cf-api}}
+      REGION_1_CF_ORG: {{region-1-cf-org}}
+      REGION_1_CF_SPACE: {{region-1-cf-space}}
+      REGION_1_CF_USERNAME: {{region-1-cf-username}}
+      REGION_1_CF_PASSWORD: {{region-1-cf-password}}
+      REGION_2_CF_API: {{region-2-cf-api}}
+      REGION_2_CF_ORG: {{region-2-cf-org}}
+      REGION_2_CF_SPACE: {{region-2-cf-space}}
+      REGION_2_CF_USERNAME: {{region-2-username}}
+      REGION_2_CF_PASSWORD: {{region-2-password}}
+      REGION_3_CF_API: {{region-3-cf-api}}
+      REGION_3_CF_ORG: {{region-3-cf-org}}
+      REGION_3_CF_SPACE: {{region-3-cf-space}}
+      REGION_3_CF_USERNAME: {{region-3-username}}
+      REGION_3_CF_PASSWORD: {{region-3-password}}
+      TRANSACTION_DATASOURCE_JDBC: {{transaction-datasource-jdbc}}
+          
+- name: run-ha-tests
+  serial_groups: [rabbitmq-multisite]
+  plan:
+  - get: src
+    passed : ["deploy-apps"]
+    trigger: true
+  - task: run-ha-tests
+    file: src/ci/tasks/run-ha-tests/run-ha-tests.yml
+    input_mapping:
+      src: src
+    params:
+      REGION_1_CF_API: {{region-1-cf-api}}
+      REGION_1_CF_ORG: {{region-1-cf-org}}
+      REGION_1_CF_SPACE: {{region-1-cf-space}}
+      REGION_1_CF_USERNAME: {{region-1-cf-username}}
+      REGION_1_CF_PASSWORD: {{region-1-cf-password}}
+      REGION_1_CONSUMER_URL: {{region-1-consumer-url}}
+      REGION_2_CONSUMER_URL: {{region-2-consumer-url}}
+      REGION_1_PRODUCER_URL: {{region-1-producer-url}}
+      REGION_2_PRODUCER_URL: {{region-2-producer-url}}
+      REGION_1_BROKER_VHOST: {{region-1-broker-vhost}}
+      REGION_2_BROKER_VHOST: {{region-2-broker-vhost}}
+      REGION_1_BROKER_URI: {{region-1-broker-uri}}
+      REGION_2_BROKER_URI: {{region-2-broker-uri}}
+      REGION_1_BROKER_HTTP_URI: {{region-1-broker-http-uri}}
+      REGION_2_BROKER_HTTP_URI: {{region-2-broker-http-uri}}

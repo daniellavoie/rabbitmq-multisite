@@ -11,7 +11,7 @@ resources:
   source:
     repo: daniellavoie/rabbitmq-multisite
     access_token: {{github-access-token}}
-    uri: {{github-uri}}
+    uri: https://github.com/daniellavoie/rabbitmq-multisite.git
 
 jobs:
 - name: deploy-apps
@@ -44,6 +44,40 @@ jobs:
       REGION_3_CF_USERNAME: {{region-3-username}}
       REGION_3_CF_PASSWORD: {{region-3-password}}
       TRANSACTION_DATASOURCE_JDBC: {{transaction-datasource-jdbc}}
+
+      on_failure:
+        put: src-pr
+        params:
+          path: src-pr
+          status: failure
+          
+- name: run-ha-tests
+  serial_groups: [rabbitmq-multisite]
+  plan:
+  - get: src-pr
+    passed : ["deploy-apps"]
+    trigger: true
+  - task: run-ha-tests
+    file: src-pr/ci/tasks/run-ha-tests/run-ha-tests.yml
+    input_mapping:
+      src: src-pr
+    params:
+      REGION_1_CF_API: {{region-1-cf-api}}
+      REGION_1_CF_ORG: {{region-1-cf-org}}
+      REGION_1_CF_SPACE: {{region-1-cf-space}}
+      REGION_1_CF_USERNAME: {{region-1-cf-username}}
+      REGION_1_CF_PASSWORD: {{region-1-cf-password}}
+      
+      REGION_1_CONSUMER_URL: {{region-1-consumer-url}}
+      REGION_2_CONSUMER_URL: {{region-2-consumer-url}}
+      REGION_1_PRODUCER_URL: {{region-1-producer-url}}
+      REGION_2_PRODUCER_URL: {{region-2-producer-url}}
+      REGION_1_BROKER_VHOST: {{region-1-broker-vhost}}
+      REGION_2_BROKER_VHOST: {{region-2-broker-vhost}}
+      REGION_1_BROKER_URI: {{region-1-broker-uri}}
+      REGION_2_BROKER_URI: {{region-2-broker-uri}}
+      REGION_1_BROKER_HTTP_URI: {{region-1-broker-http-uri}}
+      REGION_2_BROKER_HTTP_URI: {{region-2-broker-http-uri}}
 
       on_failure:
         put: src-pr

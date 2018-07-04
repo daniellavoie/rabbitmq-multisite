@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -21,7 +22,8 @@ public class EventController {
 	}
 
 	@PostMapping
-	public void generateEvent(@RequestBody String message) {
-		eventService.notifyEvent(new Event(UUID.randomUUID().toString(), LocalDateTime.now(), source, message));
+	public void generateEvent(@RequestBody String message, @RequestParam long eventNumber) {
+		eventService.notifyEvent(
+				new Event(UUID.randomUUID().toString(), LocalDateTime.now(), source, message, eventNumber));
 	}
 }
