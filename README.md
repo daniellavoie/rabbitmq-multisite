@@ -32,8 +32,9 @@ transaction recovery in a disaster scenario involving losing a site.
 
 ## Prerequisites
 
+* `On Demand RabbitMQ` or `Standard RabbitMQ` with federation plugin installed
 * 3 spaces
-* A `On Demand RabbitMQ` service instance named `broker` in `space 1` and `space 2`.
+* An On Demand or Standard `RabbitMQ` service instance named `broker` in `space 1` and `space 2`.
 * A `MySQL` service instance named `event-store-db` in `space 1` and `space 2`.
 * A `MySQL` service instance named `transaction-db` in `space 3`.
 * A service key for each `broker` service instance in `space 1` and `space 2`.
