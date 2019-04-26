@@ -1,6 +1,9 @@
 package io.pivotal.rabbitmq.multisite.consumer.event;
 
-import java.util.UUID;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.transaction.Transactional;
@@ -13,21 +16,24 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Service;
 
-import io.pivotal.rabbitmq.multisite.consumer.transaction.Transaction;
-import io.pivotal.rabbitmq.multisite.consumer.transaction.TransactionService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class EventServiceImpl implements EventService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EventServiceImpl.class);
 
 	private EventRepository eventRepository;
-	private TransactionService transactionService;
 	private String sourceToProcess;
+	private Map<String, EventReplicationProcessor<?>> eventReplicationProcessors;
 
-	public EventServiceImpl(EventRepository eventRepository, TransactionService transactionService,
+	private ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+
+	public EventServiceImpl(EventRepository eventRepository,
+			List<EventReplicationProcessor<?>> eventReplicationProcessors,
 			@Value("${consumer.source:}") String sourceToProcess) {
 		this.eventRepository = eventRepository;
-		this.transactionService = transactionService;
+		this.eventReplicationProcessors = eventReplicationProcessors.stream()
+				.collect(Collectors.toMap(processor -> processor.getSupportedType().getName(), processor -> processor));
 		this.sourceToProcess = sourceToProcess;
 	}
 
@@ -36,17 +42,21 @@ public class EventServiceImpl implements EventService {
 		eventRepository.deleteAll();
 	}
 
-	private void generateTransaction(Event event) {
-		transactionService.save(new Transaction(UUID.randomUUID().toString(), event.getTimestamp(), event.getSource(),
-				event.getMessage()));
+	public void processEvent(Event event) {
+		EventReplicationProcessor<?> processor = Optional
+				.ofNullable(eventReplicationProcessors.get(event.getMessageClass()))
+				.orElseThrow(() -> new RuntimeException(
+						"Could not find any event replication processor for " + event.getMessageClass() + "."));
+
+		processor.convertAndProcessEvent(event);
 	}
 
 	@StreamListener(EventSink.INPUT)
-	public void processEvent(Event event) {
+	public void processEventNotification(Event event) {
 		eventRepository.save(event);
 
 		if ("".equals(sourceToProcess) || event.getSource().equals(sourceToProcess)) {
-			generateTransaction(event);
+			processEvent(event);
 		}
 	}
 
@@ -57,7 +67,7 @@ public class EventServiceImpl implements EventService {
 
 		try (Stream<Event> stream = eventRepository.findBySourceAndEventNumberGreaterThanEqual(source,
 				fromEventNumber)) {
-			stream.forEach(this::generateTransaction);
+			stream.forEach(this::processEvent);
 		}
 
 		LOGGER.info("Event recovery completed.ﬂØæ");

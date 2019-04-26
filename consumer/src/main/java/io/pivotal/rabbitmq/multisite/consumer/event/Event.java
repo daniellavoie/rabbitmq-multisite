@@ -12,17 +12,20 @@ public class Event {
 	private LocalDateTime timestamp;
 	private String source;
 	private String message;
+	private String messageClass;
 	private long eventNumber;
 
 	public Event() {
 
 	}
 
-	public Event(String id, LocalDateTime timestamp, String source, String message, long eventNumber) {
+	public Event(String id, LocalDateTime timestamp, String source, String message, String messageClass,
+			long eventNumber) {
 		this.id = id;
 		this.timestamp = timestamp;
 		this.source = source;
 		this.message = message;
+		this.messageClass = messageClass;
 		this.eventNumber = eventNumber;
 	}
 
@@ -56,6 +59,14 @@ public class Event {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getMessageClass() {
+		return messageClass;
+	}
+
+	public void setMessageClass(String messageClass) {
+		this.messageClass = messageClass;
 	}
 
 	public long getEventNumber() {
